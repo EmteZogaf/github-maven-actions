@@ -4,6 +4,13 @@
   <artifactId>github-actions-maven</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <name>GitHub Actions Maven</name>
+  <scm>
+    <connection>scm:git:${project.scm.url}</connection>
+    <developerConnection>scm:git:${project.scm.url}</developerConnection>
+    <url>https://github.com/EmteZogaf/github-actions-maven.git</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
