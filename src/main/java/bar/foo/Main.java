@@ -7,6 +7,6 @@ public class Main {
     }
 
     public static String foo() {
-        return "bar";
+        return "foo";
     }
 }
