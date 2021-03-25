@@ -2,13 +2,13 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>bar.foo</groupId>
   <artifactId>github-actions-maven</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.1-SNAPSHOT</version>
   <name>GitHub Actions Maven</name>
   <scm>
     <connection>scm:git:${project.scm.url}</connection>
     <developerConnection>scm:git:${project.scm.url}</developerConnection>
     <url>https://github.com/EmteZogaf/github-actions-maven.git</url>
-    <tag>v0.0.1</tag>
+    <tag>github-actions-maven-0.0.1</tag>
   </scm>
 
   <properties>
