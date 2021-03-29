@@ -72,12 +72,11 @@ jobs:
         short_tags: true
 
     - name: Export Version
+      if: env.IS_RELEASE == 'true'
       run: echo "RELEASE_VERSION=${{ steps.semantic.outputs.version }}" >> $GITHUB_ENV
 
-    - name: Echo
-      run: echo $RELEASE_VERSION $IS_RELEASE
-
     - name: Update Project Version
+      if: env.IS_RELEASE == 'true'
       run: mvn versions:set -DnewVersion=${{ env.RELEASE_VERSION }}
 
     - uses: EndBug/add-and-commit@v7
@@ -90,9 +89,11 @@ jobs:
         tag: 'v${{ env.RELEASE_VERSION }} --force'
 
     - name: Build
+      if: env.IS_RELEASE == 'true'
       run: mvn -B -DskipTests -DskipITs package
 
     - name: Push to GitHub Packages
+      if: env.IS_RELEASE == 'true'
       uses: docker/build-push-action@v1
       with:
         username: ${{ github.actor }}
