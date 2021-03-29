@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up JDK 15
+      uses: actions/setup-java@v1
+      with:
+        java-version: 15
+
+    - name: Cache Local Maven Repo
+      uses: actions/cache@v2.1.2
+      with:
+        path: ~/.m2/repository
+        key: maven-repo
+
+    - name: Build
+      run: mvn -B package
+
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up JDK 15
+      uses: actions/setup-java@v1
+      with:
+        java-version: 15
+
+    - name: Cache Local Maven Repo
+      uses: actions/cache@v2.1.2
+      with:
+        path: ~/.m2/repository
+        key: maven-repo
+
+    - name: Release Requested
+      id: re
+      run: |
+        lastTag="$(git describe --tags --abbrev=0 --match='v*[0-9.]' ${{ github.ref }}~1)"
+        isRelease="$( git log --pretty="%s" --author-date-order $( [[ '$lastTag' = '' ]] && echo 'HEAD' || echo $lastTag..HEAD ) | grep -Eiq '\[(fix|feat|break)\]' && echo 'true' || echo 'false' )"
+        echo "IS_RELEASE=$isRelease" >> $GITHUB_ENV
+
+    - id: semantic
+      uses: paulhatch/semantic-version@v4.0.1
+      if: env.IS_RELEASE == 'true'
+      with:
+        # The prefix to use to identify tags
+        tag_prefix: "v"
+        # A string which, if present in a git commit, indicates that a change represents a
+        # major (breaking) change, supports regular expressions wrapped with '/'
+        major_pattern: "/\\[[Bb][Rr][Ee][Aa][Kk]\\]/"
+        # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
+        minor_pattern: "/\\[[Ff][Ee][Aa][Tt]\\]/"
+        # A string to determine the format of the version output
+        format: "${major}.${minor}.${patch}"
+        # Indicate whether short tags like 'v1' should be supported. If false only full
+        # tags like 'v1.0.0' will be recognized.
+        short_tags: true
+
+    - name: Export Version
+      run: echo "RELEASE_VERSION=${{ steps.semantic.outputs.version }}" >> $GITHUB_ENV
+
+    - name: Echo
+      run: echo $RELEASE_VERSION $IS_RELEASE
+
+    - name: Update Project Version
+      run: mvn versions:set -DnewVersion=${{ env.RELEASE_VERSION }}
+
+    - uses: EndBug/add-and-commit@v7
+      if: env.IS_RELEASE == 'true'
+      with:
+        add: 'pom.xml'
+        author_name: release-bot
+        author_email: release-bot@github.com
+        message: '[ci skip] Release Version ${{ env.RELEASE_VERSION }}'
+        tag: 'v${{ env.RELEASE_VERSION }} --force'
