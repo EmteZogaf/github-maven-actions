@@ -49,7 +49,6 @@ jobs:
         key: maven-repo
 
     - name: Release Requested
-      id: re
       run: |
         lastTag="$(git describe --tags --abbrev=0 --match='v*[0-9.]' ${{ github.ref }}~1)"
         isRelease="$( git log --pretty="%s" --author-date-order $( [[ '$lastTag' = '' ]] && echo 'HEAD' || echo $lastTag..HEAD ) | grep -Eiq '\[(fix|feat|break)\]' && echo 'true' || echo 'false' )"
@@ -87,5 +86,19 @@ jobs:
         add: 'pom.xml'
         author_name: release-bot
         author_email: release-bot@github.com
-        message: '[ci skip] Release Version ${{ env.RELEASE_VERSION }}'
+        message: 'Release Version ${{ env.RELEASE_VERSION }}'
         tag: 'v${{ env.RELEASE_VERSION }} --force'
+
+    - name: Build
+      run: mvn -B -DskipTests -DskipITs package
+
+    - name: Push to GitHub Packages
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        repository: emtezogaf/github-actions-maven/foo
+        always_pull: true
+        cache_froms: emtezogaf/github-actions-maven/foo:latest
+        tags: latest,${{ env.RELEASE_VERSION }}
