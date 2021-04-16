@@ -41,6 +41,7 @@
         <version>3.0.0-M1</version>
         <configuration>
           <scmCommentPrefix>[ci skip]</scmCommentPrefix>
+          <scmReleaseCommitComment>prepare release @{releaseLabel}</scmReleaseCommitComment>
           <tagNameFormat>v@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
