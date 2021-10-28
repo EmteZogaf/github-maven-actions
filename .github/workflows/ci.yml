@@ -10,6 +10,9 @@ on:
     - v[0-9]+.[0-9]+.[0-9]+**
   pull_request:
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
 
   test:
@@ -51,27 +54,10 @@ jobs:
         path: ~/.m2/repository
         key: maven-repo
 
-    - name: Build
-      run: mvn -B -DskipTests -DskipITs package
+    - uses: s4u/maven-settings-action@v2.4.0
 
-    - name: Prepare Version
-      id: prep
-      run: |
-        echo ::set-output name=repository::$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
-        echo ::set-output name=version::${GITHUB_REF#refs/tags/v}
+    - name: Set Release Version
+      run: mvn versions:set -DnewVersion=$(echo ${{ github.ref }} | sed -r 's|.*refs/tags/v(.+)|\1|')
 
-    - name: Login to GitHub Docker Registry
-      uses: docker/login-action@v1
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v2
-      with:
-        context: .
-        tags: |
-          ghcr.io/${{ steps.prep.outputs.repository }}:${{ steps.prep.outputs.version }}
-          ghcr.io/${{ steps.prep.outputs.repository }}:latest
-        push: true
+    - name: Release Maven Package
+      run: mvn deploy
