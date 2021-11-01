@@ -33,7 +33,7 @@ jobs:
         key: maven-repo
 
     - name: Build
-      run: mvn -B package
+      run: mvn -q -B package
 
   build:
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
@@ -57,7 +57,7 @@ jobs:
     - uses: s4u/maven-settings-action@v2.4.0
 
     - name: Set Release Version
-      run: mvn versions:set -DnewVersion=$(echo ${{ github.ref }} | sed -r 's|.*refs/tags/v(.+)|\1|')
+      run: mvn -q versions:set -DnewVersion=$(echo ${{ github.ref }} | sed -r 's|.*refs/tags/v(.+)|\1|')
 
     - name: Release Maven Package
-      run: mvn deploy
+      run: mvn -q deploy
