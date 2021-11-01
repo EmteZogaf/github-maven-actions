@@ -1,6 +1,6 @@
 package bar.foo;
 
-public class Main {
+public class ChildMain {
 
     public static void main(String[] args) {
         System.out.println(foo());

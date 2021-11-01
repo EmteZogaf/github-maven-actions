@@ -35,29 +35,3 @@ jobs:
     - name: Build
       run: mvn -q -B package
 
-  build:
-    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up JDK 15
-      uses: actions/setup-java@v1
-      with:
-        java-version: 15
-
-    - name: Cache Local Maven Repo
-      uses: actions/cache@v2.1.2
-      with:
-        path: ~/.m2/repository
-        key: maven-repo
-
-    - uses: s4u/maven-settings-action@v2.4.0
-
-    - name: Set Release Version
-      run: mvn -q versions:set -DnewVersion=$(echo ${{ github.ref }} | sed -r 's|.*refs/tags/v(.+)|\1|')
-
-    - name: Release Maven Package
-      run: mvn -q deploy
