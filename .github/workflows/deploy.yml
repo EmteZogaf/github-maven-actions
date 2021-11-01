@@ -7,11 +7,13 @@ on:
 
 jobs:
   maven:
-    if: ${{ github.event.workflow_run.conclusion == 'success' && startsWith(github.ref, 'refs/tags/v') }}
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
+
+    - name: Foo
+      run: echo ${{ github.event.workflow_run.head_branch }}
 
     - name: Set up JDK 15
       uses: actions/setup-java@v1
