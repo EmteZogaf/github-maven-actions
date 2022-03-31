@@ -6,12 +6,6 @@
   <name>orphan</name>
   <packaging>war</packaging>
 
-  <parent>
-    <groupId>bar.foo</groupId>
-    <artifactId>parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
-
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>15</maven.compiler.release>
