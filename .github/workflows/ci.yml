@@ -62,7 +62,7 @@ jobs:
       id: prep
       run: |
         echo ::set-output name=repository::$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
-        echo ::set-output name=version::${WORKFLOW_REF#v}
+        echo ::set-output name=version::${GITHUB_REF#refs/tags/v}
 
     - name: Set Release Version
       run: mvn -q versions:set -DnewVersion="${{ steps.prep.outputs.version }}"
