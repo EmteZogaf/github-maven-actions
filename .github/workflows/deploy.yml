@@ -12,6 +12,7 @@ jobs:
     env:
       WORKFLOW_REF: ${{ github.event.workflow_run.head_branch }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
     - uses: actions/checkout@v2
       with:
@@ -89,6 +90,7 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         path: ./orphan/Dockerfile
+        context: .
         build-args: |
           mavenOptions="-q"
         push: true
