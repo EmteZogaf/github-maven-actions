@@ -89,6 +89,8 @@ jobs:
         path: ~/.m2/repository
         key: maven-repo
 
+    - uses: s4u/maven-settings-action@v2.4.0
+
     - name: Prepare Version
       id: prep
       run: |
