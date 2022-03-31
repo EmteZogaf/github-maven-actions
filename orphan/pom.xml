@@ -47,7 +47,7 @@
   </build>
   <repositories>
     <repository>
-      <id>codex</id>
+      <id>github</id>
       <name>GitHub NUM CODEX Apache Maven Packages</name>
       <url>https://maven.pkg.github.com/EmteZogaf/*</url>
       <releases>

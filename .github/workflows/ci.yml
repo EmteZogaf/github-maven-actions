@@ -89,6 +89,8 @@ jobs:
         path: ~/.m2/repository
         key: maven-repo
 
+    - uses: s4u/maven-settings-action@v2.4.0
+
     - name: Prepare Version
       id: prep
       run: |
@@ -114,7 +116,7 @@ jobs:
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v2
       with:
-        path: ./orphan/Dockerfile
+        file: ./orphan/Dockerfile
         context: .
         build-args: |
           mavenOptions="-q"
