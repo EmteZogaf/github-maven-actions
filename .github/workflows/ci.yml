@@ -33,7 +33,7 @@ jobs:
     needs: bar
     steps:
     - name: Skip this step if skip
-      run: echo "Hello Baz!"
+      run: echo "Hello Baz ${{ steps.foo.conclusion }}!"
 
   test:
     runs-on: ubuntu-latest
