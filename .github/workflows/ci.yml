@@ -53,7 +53,7 @@ jobs:
     - name: Build
       run: mvn -q -B package
 
-maven:
+  maven:
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
     needs: [test, bar]
     runs-on: ubuntu-latest
