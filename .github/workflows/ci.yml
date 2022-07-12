@@ -24,7 +24,6 @@ jobs:
       
   bar:
     runs-on: ubuntu-latest
-    needs: foo
     steps:
     - name: Skip this step if skip
       run: echo "Hello Bar ${{ steps.foo.conclusion }}!"
