@@ -18,7 +18,6 @@ jobs:
   foo:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.event.head_commit.message, '[skip foo]') }}
-    needs: test
     steps:
     - name: Skip this step if skip
       run: echo 'Hello Foo!'
