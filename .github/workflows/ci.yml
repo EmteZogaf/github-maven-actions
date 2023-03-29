@@ -10,162 +10,42 @@ on:
     - v[0-9]+.[0-9]+.[0-9]+**
   pull_request:
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 jobs:
 
   foo:
     runs-on: ubuntu-latest
-    if: ${{ !contains(github.event.head_commit.message, '[skip foo]') }}
+    outputs:
+      images: ${{ steps.matrixgen.outputs.images }}
     steps:
-    - name: Skip this step if skip
-      run: echo 'Hello Foo!'
+
+      - uses: actions/checkout@v3
+
+      - name: Generate Image Test Matrix
+        id: matrixgen
+        run: |
+          echo "images=$(
+            first=true
+            echo -n '['
+            for i in $(grep -r --include="docker-compose.yml" -Pho 'image: \K(.+)$' | tr -d "\"'" | sort | uniq)
+            do
+              if $first
+              then
+                first=false
+              else
+                echo -n ","
+              fi
+              echo -n '"'$i'"'
+            done
+            echo ']')" >> "$GITHUB_OUTPUT"
 
   bar:
     runs-on: ubuntu-latest
+    needs: foo
+    strategy:
+      fail-fast: false
+      matrix:
+        image: ${{ fromJSON(needs.foo.outputs.images) }}
     steps:
-    - name: Skip this step if skip
-      run: echo "Hello Bar ${{ steps.foo.conclusion }}!"
+      - name: Scan Image ${{ matrix.image }}
+        run: echo "Scanning image ${{ matrix.image }}"
 
-  baz:
-    runs-on: ubuntu-latest
-    needs: bar
-    steps:
-    - name: Skip this step if skip
-      run: echo "Hello Baz ${{ steps.foo.conclusion }}!"
-
-  test:
-    runs-on: ubuntu-latest
-    needs: bar
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up JDK 15
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'zulu'
-        java-version: 15
-
-    - name: Skip this step
-
-      run: echo 'Hello World!'
-
-    - name: Cache Local Maven Repo
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2/repository
-        key: maven-repo
-
-    - name: Build
-      run: mvn -q -B package
-
-  maven:
-    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-    needs: [test, bar]
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Set up JDK 15
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'zulu'
-        java-version: 15
-
-    - name: Cache Local Maven Repo
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2/repository
-        key: maven-repo
-
-    - uses: s4u/maven-settings-action@v2.4.0
-
-    - name: Prepare Version
-      id: prep
-      run: |
-        echo ::set-output name=repository::$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
-        echo ::set-output name=version::${GITHUB_REF#refs/tags/v}
-
-    - name: Set Release Version
-      run: mvn -q versions:set -DnewVersion="${{ steps.prep.outputs.version }}"
-
-    - name: Release Maven Package
-      run: mvn deploy
-
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: artifacts
-        path: |
-          child/target/child-*.jar
-          orphan/target/orphan-*.war
-
-
-  docker:
-    runs-on: ubuntu-latest
-    needs: maven
-
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
-
-    - name: Set Up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'zulu'
-        java-version: 17
-
-    - name: Cache Local Maven Repo
-      uses: actions/cache@v3
-      with:
-        path: ~/.m2/repository
-        key: maven-repo
-
-    - name: Prepare Version
-      id: prep
-      run: |
-        echo ::set-output name=repository::$(echo $GITHUB_REPOSITORY | tr '[:upper:]' '[:lower:]')
-        echo ::set-output name=version::${GITHUB_REF#refs/tags/v}
-
-    - name: Set Version in Maven Parent Project and Submodules
-      run: mvn versions:set -DnewVersion="${{ steps.prep.outputs.version }}" -DprocessAllModules=true
-
-    - name: Set Version in Server Project
-      run: mvn -q -f ./orphan/pom.xml versions:set -DnewVersion="${{ steps.prep.outputs.version }}"
-
-    - name: Login to GitHub Container Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Build and Push Docker Image
-      uses: docker/build-push-action@v3
-      with:
-        file: ./orphan/Dockerfile
-        context: .
-        build-args: |
-          mavenOptions="-q"
-        push: true
-        tags: |
-          ghcr.io/${{ steps.prep.outputs.repository }}:latest
-          ghcr.io/${{ steps.prep.outputs.repository }}:${{ steps.prep.outputs.version }}
-
-    - name: Download Artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: artifacts
-
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: |
-          child/target/child-*.jar
-          orphan/target/orphan-*.war
