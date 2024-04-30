@@ -121,7 +121,7 @@ jobs:
     - name: Release
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          child/target/child-*.jar
-          child/target/child-*.jar.sha256
         name: "Child - v${{ steps.prep.outputs.version }}"
+        files: |
+          *.jar
+        fail_on_unmatched_files: true
