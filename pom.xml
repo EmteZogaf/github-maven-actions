@@ -19,6 +19,14 @@
         <module>orphan</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>de.ume</groupId>
+            <artifactId>deidentifhir</artifactId>
+            <version>0.2.11</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -32,6 +40,7 @@
             </plugin>
         </plugins>
     </build>
+
     <distributionManagement>
         <repository>
             <id>github</id>
@@ -39,4 +48,15 @@
             <url>https://maven.pkg.github.com/EmteZogaf/github-actions-maven</url>
         </repository>
     </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>github-umessen</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/UMEssen/*</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>
