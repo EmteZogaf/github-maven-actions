@@ -106,3 +106,13 @@ jobs:
         name: "Child - v${{ steps.prep.outputs.version }}"
         files: "*.zip"
         fail_on_unmatched_files: true
+        
+  main-check:
+    if: github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Tag is part of main
+      run: exit 0
+    
+
