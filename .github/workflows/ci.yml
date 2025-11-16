@@ -18,7 +18,7 @@ jobs:
       images: ${{ steps.matrixgen.outputs.images }}
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
       - name: Generate Image Test Matrix
         id: matrixgen
@@ -64,7 +64,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
 
     - name: Set up JDK 21
       uses: actions/setup-java@v3
@@ -95,7 +95,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v5
 
     - name: Create artifacts
       run: echo foo > foo; zip foo.zip foo
